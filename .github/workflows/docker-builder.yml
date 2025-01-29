@@ -11,7 +11,7 @@ jobs:
 
     env:
       DOCKERHUB_USERNAME: bmo75
-      IMAGE_REPO_NAME: alex-printer-build-counter:tagname
+      IMAGE_REPO_NAME: alex-printer-build-counter
 
     steps:
     - name: Checkout code
