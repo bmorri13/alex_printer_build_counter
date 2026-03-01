@@ -46,4 +46,5 @@ yarn-error.log*
 README.md
 LICENSE
 *.md
-.github 
+*.mp4
+.github
