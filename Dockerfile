@@ -1,24 +1,22 @@
 # Build stage
-FROM node
+FROM node:24-alpine AS build
+WORKDIR /app
 
+# Install exactly what package-lock.json pins
+COPY package.json package-lock.json ./
+RUN npm ci
 
-# Set the working directory inside the container  
-WORKDIR /app  
+COPY . .
+RUN npm run build && npm prune --omit=dev
 
-# Copy package.json and package-lock.json to the container  
-COPY package*.json ./  
-
-# Install dependencies  
-RUN npm install  
-
-# Copy the app source code to the container  
-COPY . .  
-
-# Build the Next.js app  
-RUN npm run build  
-
-# Expose the port the app will run on  
-EXPOSE 3000  
-
-# Start the app  
-CMD ["npm", "start"]  
+# Runtime stage: production dependencies and build output only, non-root
+FROM node:24-alpine
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=build --chown=node:node /app/package.json ./
+COPY --from=build --chown=node:node /app/node_modules ./node_modules
+COPY --from=build --chown=node:node /app/.next ./.next
+COPY --from=build --chown=node:node /app/public ./public
+USER node
+EXPOSE 3000
+CMD ["node_modules/.bin/next", "start"]
